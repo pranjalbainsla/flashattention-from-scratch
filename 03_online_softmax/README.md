@@ -8,25 +8,25 @@ scores = [4, 2, 7, 3]
 
 We want:
 
-$$
+```math
 \text{softmax}(x_i)
 =
 \frac{e^{x_i}}{\sum_j e^{x_j}}
-$$
+```
 
 But for numerical stability, we actually calculate:
 
-$$
+```math
 \text{softmax}(x_i)
 =
 \frac{e^{x_i-m}}{\sum_j e^{x_j-m}}
-$$
+```
 
 where:
 
-$$
+```math
 m = \max_j x_j
-$$
+```
 
 For the whole row:
 
@@ -55,15 +55,15 @@ block 1 = [4, 2]
 
 We can calculate:
 
-$$
+```math
 m_1 = 4
-$$
+```
 
 and:
 
-$$
+```math
 l_1 = e^{4-4} + e^{2-4}
-$$
+```
 
 Then we encounter:
 
@@ -73,49 +73,49 @@ block 2 = [7, 3]
 
 Now the maximum changed:
 
-$$
+```math
 m_2 = 7
-$$
+```
 
 So here's the problem:
 
-We previously calculated everything relative to $m_1 = 4$, but now we need everything relative to $m_2 = 7$.
+We previously calculated everything relative to `m₁ = 4`, but now we need everything relative to `m₂ = 7`.
 
 **We can fix this mathematically.**
 
 The old normalization was:
 
-$$
+```math
 l_1
 =
 \sum_{j \in block1} e^{x_j-m_1}
-$$
+```
 
 The new normalization should be:
 
-$$
+```math
 l_2
 =
 \sum_{j \in block1 \cup block2} e^{x_j-m_2}
-$$
+```
 
 For the old block:
 
-$$
+```math
 e^{x_j-m_2}
 =
 e^{x_j-m_1}e^{m_1-m_2}
-$$
+```
 
 Therefore:
 
-$$
+```math
 l_2
 =
 l_1 e^{m_1-m_2}
 +
 \sum_{j \in block2} e^{x_j-m_2}
-$$
+```
 
 That's the crucial recurrence.
 
@@ -174,7 +174,7 @@ But there's one more piece.
 
 Remember earlier we established that we need:
 
-$$
+```math
 O_i
 =
 \frac{
@@ -182,32 +182,32 @@ O_i
 }{
 \sum_j e^{S_{ij}-m_i}
 }
-$$
+```
 
 So maintaining `m` and `l` isn't enough.
 
 We also need to maintain the numerator:
 
-$$
+```math
 A
 =
 \sum_j e^{S_{ij}-m}V_j
-$$
+```
 
 When a new block arrives, we'll update `A` using the exact same rescaling idea.
 
-$$
+```math
 A_{\text{new}}
 =
 A_{\text{old}} e^{m_{\text{old}}-m_{\text{new}}}
 +
 \sum_j e^{s_j-m_{\text{new}}}V_j
-$$
+```
 
 And finally:
 
-$$
+```math
 O = \frac{A}{l}
-$$
+```
 
 This is the core mathematical mechanism behind FlashAttention's forward pass.
