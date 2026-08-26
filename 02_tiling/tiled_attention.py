@@ -23,9 +23,13 @@ def tiled_attention(Q, K, V, q_block_size, kv_block_size):
         # m: (q_block_size,)   running maximum
         # l: (q_block_size,)   running softmax denominator
         # A: (q_block_size,d)  running weighted sum of V
-        m = torch.full((q_block_size,), float("-inf"))
-        l = torch.zeros(q_block_size)
-        A = torch.zeros(q_block_size, K.size(1))
+        m = torch.full(
+            (block_Q.size(0),),
+            float("-inf")
+        )
+        l = torch.zeros(block_Q.size(0))
+        A = torch.zeros_like(block_Q)
+        # Refactor: use block_Q.size(0) because the final Q block may be smaller than q_block_size
 
         for start_kv in range(0, K.size(0), kv_block_size):
             block_K = K[start_kv:start_kv + kv_block_size]  # (kv_block_size, d)
@@ -52,6 +56,6 @@ def tiled_attention(Q, K, V, q_block_size, kv_block_size):
             )
 
         out[start_q: start_q + q_block_size] = A/l[:, None] # (q_block_size, d)
-        
+
     return out
 
