@@ -124,3 +124,71 @@ And this is exactly where the next major idea enters:
 The question becomes:
 
 > **Can we process one score block, throw it away, process the next score block, and still maintain exactly the same softmax normalization we would have gotten from seeing the entire row?**
+
+(See [Online softmax theory](../03_online_softmax/README.md) before the next section)
+# Tiled Attention
+
+Standard attention materializes the full `N × N` score and probability matrices:
+
+QKᵀ → softmax → P
+
+The goal of tiled attention is to avoid materializing these matrices. Instead, we divide Q, K, and V into blocks and process them incrementally.
+
+## Block structure
+
+For a Q block $Q_i$ and K/V block $(K_j, V_j)$:
+
+$$
+S_{ij} = Q_i K_j^\top
+$$
+
+The score block has shape: **(Bq, Bk)**
+
+We process one K/V block at a time and immediately incorporate its contribution into the output.
+
+Conceptually:
+
+Q block
+    │
+    ├── K/V block 0 → score block → update state
+    ├── K/V block 1 → score block → update state
+    ├── K/V block 2 → score block → update state
+    └── ...
+
+The score blocks are temporary. We never construct the complete `N × N` score matrix.
+
+## Running state
+
+For every query in the current Q block, we maintain:
+
+m : running maximum score (Bq,)
+l : running softmax denominator (Bq,)
+A : running weighted sum of V (Bq, d)
+
+When a new K/V block arrives:
+
+$$
+m_{\text{new}} = \max(m_{\text{old}},\ \text{block\_max})
+$$
+
+$$
+l_{\text{new}}
+=
+l_{\text{old}} \exp(m_{\text{old}} - m_{\text{new}})
++
+\sum \exp(\text{score} - m_{\text{new}})
+$$
+
+$$
+A_{\text{new}}
+=
+A_{\text{old}} \exp(m_{\text{old}} - m_{\text{new}})
++
+\sum \exp(\text{score} - m_{\text{new}})\,V
+$$
+Finally:
+
+$$
+O_{\text{block}} = \frac{A}{l}
+$$
+
