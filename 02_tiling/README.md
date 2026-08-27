@@ -138,9 +138,9 @@ The goal of tiled attention is to avoid materializing these matrices. Instead, w
 
 For a Q block $Q_i$ and K/V block $(K_j, V_j)$:
 
-$$
+```math
 S_{ij} = Q_i K_j^\top
-$$
+```
 
 The score block has shape: **(Bq, Bk)**
 
@@ -167,28 +167,28 @@ A : running weighted sum of V (Bq, d)
 
 When a new K/V block arrives:
 
-$$
+```math
 m_{\text{new}} = \max(m_{\text{old}},\ \text{block\_max})
-$$
+```
 
-$$
+```math
 l_{\text{new}}
 =
 l_{\text{old}} \exp(m_{\text{old}} - m_{\text{new}})
 +
 \sum \exp(\text{score} - m_{\text{new}})
-$$
+```
 
-$$
+```math
 A_{\text{new}}
 =
 A_{\text{old}} \exp(m_{\text{old}} - m_{\text{new}})
 +
 \sum \exp(\text{score} - m_{\text{new}})\,V
-$$
+```
 Finally:
 
-$$
+```math
 O_{\text{block}} = \frac{A}{l}
-$$
+```
 
