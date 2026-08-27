@@ -148,12 +148,14 @@ We process one K/V block at a time and immediately incorporate its contribution 
 
 Conceptually:
 
+```text
 Q block
     │
     ├── K/V block 0 → score block → update state
     ├── K/V block 1 → score block → update state
     ├── K/V block 2 → score block → update state
     └── ...
+```
 
 The score blocks are temporary. We never construct the complete `N × N` score matrix.
 
@@ -161,8 +163,8 @@ The score blocks are temporary. We never construct the complete `N × N` score m
 
 For every query in the current Q block, we maintain:
 
-m : running maximum score (Bq,)
-l : running softmax denominator (Bq,)
+m : running maximum score (Bq,)  
+l : running softmax denominator (Bq,)  
 A : running weighted sum of V (Bq, d)
 
 When a new K/V block arrives:
