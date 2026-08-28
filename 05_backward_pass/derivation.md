@@ -6,7 +6,7 @@ S = \frac{QK^\top}{\sqrt{d}}
 ```
 
 ```math
-P = \operatorname{softmax}(S)
+P = \text{softmax}(S)
 ```
 
 ```math
