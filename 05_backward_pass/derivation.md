@@ -16,11 +16,15 @@ O = PV
 Backward from `O = PV`:
 
 ```math
+\boxed{
 dV = P^\top dO
+}
 ```
 
 ```math
+\boxed{
 dP = dO V^\top
+}
 ```
 
 
@@ -149,3 +153,47 @@ dP-\sum_j(dP_jP_j)
 \right)
 }
 ```
+
+---
+Backward from $S = \frac{QK^T}{\sqrt{d}}$:
+
+Think of this as two operations:
+
+```text
+Q ──┐
+    ├── QKᵀ ── /√d ──→ S
+K ──┘
+```
+
+For ordinary matrix multiplication,
+
+```math
+S = QK^T
+```
+
+the gradients are:
+
+```math
+dQ = dS K
+```
+
+```math
+dK = dS^T Q
+```
+
+The scaling by $\frac{1}{\sqrt{d}}$ simply carries through:
+
+```math
+\boxed{
+dQ = \frac{dS K}{\sqrt{d}}
+}
+```
+
+and
+
+```math
+\boxed{
+dK = \frac{dS^T Q}{\sqrt{d}}
+}
+```
+
