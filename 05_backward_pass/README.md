@@ -251,6 +251,8 @@ The important connection to the forward pass is:
 
 That is what allows the backward pass to remain memory-efficient while producing the same gradients as the naive implementation.
 
-The implementation was first built and validated as a naive reference against PyTorch autograd, then rewritten blockwise and validated against the naive implementation.
+The implementation was first built and validated as a naive reference against PyTorch autograd, then rewritten blockwise and validated against the naive implementation.  
 
-
+---
+## Possible future optimization
+This first pass over the KV blocks is only needed to compute `D = rowsum(dP * P)`. Since `dP = dO Vᵀ` and `O = PV`, we can simplify this to `D = (O * dO).sum(dim=-1, keepdim=True)`. This would let us compute `D` directly from the already-stored `O` and `dO`, eliminating the separate first pass over `K` and `V`. 

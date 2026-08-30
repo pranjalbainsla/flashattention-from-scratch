@@ -40,6 +40,9 @@ def flash_attention_backward(Q, K, V, dO, m, l, block_size):
             ).sum(dim=-1, keepdim=True)
 
         D[q_start:q_start + block_size] = D_block
+        
+    # TODO: D can be computed directly as (O * dO).sum(dim=-1, keepdim=True),
+    # eliminating this separate first pass over K/V.
 
     # Second pass: compute dQ, dK, dV
     for q_start in range(0, Q.size(0), block_size):
