@@ -20,30 +20,54 @@ O = P @ V
 
 # ------- Manual backward -------
 
-dV_manual = P.T @ dO
+def naive_backward(Q, K, V, P, dO):
 
-dP = dO @ V.T
+    dV = P.T @ dO
 
-row_sum = (dP * P).sum(dim=-1, keepdim=True)
+    dP = dO @ V.T
 
-dS = P * (dP - row_sum)
+    row_sum = (dP * P).sum(dim=-1, keepdim=True)
 
-dQ_manual = dS @ K / math.sqrt(d)
-dK_manual = dS.T @ Q / math.sqrt(d)
+    dS = P * (dP - row_sum)
 
-# ------- PyTorch autograd -------
+    dQ = dS @ K / math.sqrt(d)
+    dK = dS.T @ Q / math.sqrt(d)
 
-L = (O * dO).sum()
-L.backward()
+    return dQ, dK, dV
 
-dQ_autograd = Q.grad
-dK_autograd = K.grad
-dV_autograd = V.grad
+# ---------- Autograd verification ----------
 
-# ---------- tests ------------
-print("dQ:", torch.allclose(dQ_manual, dQ_autograd))
-print("dK:", torch.allclose(dK_manual, dK_autograd))
-print("dV:", torch.allclose(dV_manual, dV_autograd))
-print("max error dQ:", (dQ_manual - dQ_autograd).abs().max())
-print("max error dK:", (dK_manual - dK_autograd).abs().max())
-print("max error dV:", (dV_manual - dV_autograd).abs().max())
+if __name__ == "__main__":
+
+    dQ_manual, dK_manual, dV_manual = naive_backward(
+        Q, K, V, P, dO
+    )
+
+    L = (O * dO).sum()
+
+    L.backward()
+
+    dQ_autograd = Q.grad
+    dK_autograd = K.grad
+    dV_autograd = V.grad
+
+    print("Naive backward vs autograd:")
+
+    print("dQ:", torch.allclose(dQ_manual, dQ_autograd))
+    print("dK:", torch.allclose(dK_manual, dK_autograd))
+    print("dV:", torch.allclose(dV_manual, dV_autograd))
+
+    print(
+        "max error dQ:",
+        (dQ_manual - dQ_autograd).abs().max()
+    )
+
+    print(
+        "max error dK:",
+        (dK_manual - dK_autograd).abs().max()
+    )
+
+    print(
+        "max error dV:",
+        (dV_manual - dV_autograd).abs().max()
+    )
